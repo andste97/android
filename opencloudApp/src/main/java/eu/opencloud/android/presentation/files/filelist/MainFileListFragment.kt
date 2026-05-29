@@ -1614,20 +1614,20 @@ class MainFileListFragment : Fragment(),
             }
         }
 
-        if (notAvailableLocally.isNotEmpty()) {
-            showMessageInSnackbar(
-                message = getString(R.string.download_to_device_not_available_locally, summarizeNames(notAvailableLocally))
-            )
-        }
+        val messageParts = mutableListOf<String>()
         if (succeeded.isNotEmpty()) {
-            showMessageInSnackbar(
-                message = getString(R.string.download_to_device_succeeded, summarizeNames(succeeded))
-            )
+            messageParts.add(getString(R.string.download_to_device_succeeded, summarizeNames(succeeded)))
         }
         if (failed.isNotEmpty()) {
-            showMessageInSnackbar(
-                message = getString(R.string.download_to_device_failed, summarizeNames(failed))
+            messageParts.add(getString(R.string.download_to_device_failed, summarizeNames(failed)))
+        }
+        if (notAvailableLocally.isNotEmpty()) {
+            messageParts.add(
+                getString(R.string.download_to_device_not_available_locally, summarizeNames(notAvailableLocally))
             )
+        }
+        if (messageParts.isNotEmpty()) {
+            showMessageInSnackbar(message = messageParts.joinToString("\n"))
         }
     }
 
