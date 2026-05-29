@@ -1616,19 +1616,26 @@ class MainFileListFragment : Fragment(),
 
         if (notAvailableLocally.isNotEmpty()) {
             showMessageInSnackbar(
-                message = getString(R.string.download_to_device_not_available_locally, notAvailableLocally.joinToString(", "))
+                message = getString(R.string.download_to_device_not_available_locally, summarizeNames(notAvailableLocally))
             )
         }
         if (succeeded.isNotEmpty()) {
             showMessageInSnackbar(
-                message = getString(R.string.download_to_device_succeeded, succeeded.joinToString(", "))
+                message = getString(R.string.download_to_device_succeeded, summarizeNames(succeeded))
             )
         }
         if (failed.isNotEmpty()) {
             showMessageInSnackbar(
-                message = getString(R.string.download_to_device_failed, failed.joinToString(", "))
+                message = getString(R.string.download_to_device_failed, summarizeNames(failed))
             )
         }
+    }
+
+    private fun summarizeNames(names: List<String>, maxShown: Int = 3): String {
+        if (names.size <= maxShown) return names.joinToString(", ")
+        val shown = names.take(maxShown).joinToString(", ")
+        val remaining = names.size - maxShown
+        return getString(R.string.download_to_device_and_more, shown, remaining)
     }
 
     fun setProgressBarAsIndeterminate(indeterminate: Boolean) {
