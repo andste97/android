@@ -52,6 +52,7 @@ import eu.opencloud.android.domain.files.model.OCFileWithSyncInfo
 import eu.opencloud.android.domain.utils.Event
 import eu.opencloud.android.extensions.addOpenInWebMenuOptions
 import eu.opencloud.android.extensions.collectLatestLifecycleFlow
+import eu.opencloud.android.extensions.copyOCFileToPublicDownloads
 import eu.opencloud.android.extensions.filterMenuOptions
 import eu.opencloud.android.extensions.isDownload
 import eu.opencloud.android.extensions.openOCFile
@@ -335,10 +336,27 @@ class FileDetailsFragment : FileFragment() {
                 true
             }
 
+            R.id.action_download_to_device -> {
+                downloadFileToDevice(safeFile.file)
+                true
+            }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }
         }
+    }
+
+    private fun downloadFileToDevice(file: OCFile) {
+        if (!file.isAvailableLocally) {
+            showMessageInSnackbar(
+                message = getString(R.string.download_to_device_not_available_locally, file.fileName)
+            )
+            return
+        }
+        val succeeded = requireContext().copyOCFileToPublicDownloads(file)
+        val messageRes = if (succeeded) R.string.download_to_device_succeeded else R.string.download_to_device_failed
+        showMessageInSnackbar(message = getString(messageRes, file.fileName))
     }
 
     private fun updateDetails(ocFileWithSyncInfo: OCFileWithSyncInfo) {

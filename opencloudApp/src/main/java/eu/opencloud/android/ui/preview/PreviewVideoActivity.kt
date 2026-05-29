@@ -63,6 +63,7 @@ import eu.opencloud.android.R
 import eu.opencloud.android.databinding.VideoPreviewBinding
 import eu.opencloud.android.domain.files.model.OCFile
 import eu.opencloud.android.domain.utils.Event
+import eu.opencloud.android.extensions.copyOCFileToPublicDownloads
 import eu.opencloud.android.extensions.filterMenuOptions
 import eu.opencloud.android.extensions.sendDownloadedFilesByShareSheet
 import eu.opencloud.android.extensions.showErrorInSnackbar
@@ -432,6 +433,19 @@ class PreviewVideoActivity : FileActivity(), Player.Listener, OnPrepareVideoPlay
 
             R.id.action_download_file -> {
                 fileOperationsHelper.syncFile(file)
+                true
+            }
+
+            R.id.action_download_to_device -> {
+                val succeeded = file.isAvailableLocally && copyOCFileToPublicDownloads(file)
+                val message = if (!file.isAvailableLocally) {
+                    getString(R.string.download_to_device_not_available_locally, file.fileName)
+                } else if (succeeded) {
+                    getString(R.string.download_to_device_succeeded, file.fileName)
+                } else {
+                    getString(R.string.download_to_device_failed, file.fileName)
+                }
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
                 true
             }
 

@@ -82,6 +82,7 @@ import eu.opencloud.android.domain.transfers.model.TransferStatus
 import eu.opencloud.android.domain.utils.Event
 import eu.opencloud.android.extensions.addOpenInWebMenuOptions
 import eu.opencloud.android.extensions.collectLatestLifecycleFlow
+import eu.opencloud.android.extensions.copyOCFileToPublicDownloads
 import eu.opencloud.android.extensions.filterMenuOptions
 import eu.opencloud.android.extensions.parseError
 import eu.opencloud.android.extensions.sendDownloadedFilesByShareSheet
@@ -735,6 +736,10 @@ class MainFileListFragment : Fragment(),
 
                     FileMenuOption.UNSET_AV_OFFLINE -> {
                         fileOperationsViewModel.performOperation(FileOperation.UnsetFilesAsAvailableOffline(listOf(file)))
+                    }
+
+                    FileMenuOption.DOWNLOAD_TO_DEVICE -> {
+                        downloadFilesToDevice(listOf(file))
                     }
                 }
                 dialog.hide()
@@ -1412,6 +1417,11 @@ class MainFileListFragment : Fragment(),
                 true
             }
 
+            R.id.action_download_to_device -> {
+                downloadFilesToDevice(listOf(singleFile))
+                true
+            }
+
             else -> {
                 false
             }
@@ -1488,6 +1498,11 @@ class MainFileListFragment : Fragment(),
                 requireActivity().startActivityForResult(action, FileDisplayActivity.REQUEST_CODE__COPY_FILES)
                 fileListAdapter.clearSelection()
                 updateActionModeAfterTogglingSelected()
+                true
+            }
+
+            R.id.action_download_to_device -> {
+                downloadFilesToDevice(checkedFiles)
                 true
             }
 
@@ -1569,6 +1584,50 @@ class MainFileListFragment : Fragment(),
             } else {
                 fileOperationsViewModel.performOperation(FileOperation.SynchronizeFileOperation(fileToSync = file, accountName = file.owner))
             }
+        }
+    }
+
+    /**
+     * Save the local copy of each given [OCFile] into the device's public Downloads folder.
+     *
+     * Folders are skipped. Files that are not available locally are reported to the user
+     * (a manual synchronize is required first).
+     */
+    private fun downloadFilesToDevice(files: List<OCFile>) {
+        val context = requireContext()
+        val downloadableFiles = files.filter { !it.isFolder }
+        if (downloadableFiles.isEmpty()) return
+
+        val succeeded = mutableListOf<String>()
+        val failed = mutableListOf<String>()
+        val notAvailableLocally = mutableListOf<String>()
+
+        for (file in downloadableFiles) {
+            if (!file.isAvailableLocally) {
+                notAvailableLocally.add(file.fileName)
+                continue
+            }
+            if (context.copyOCFileToPublicDownloads(file)) {
+                succeeded.add(file.fileName)
+            } else {
+                failed.add(file.fileName)
+            }
+        }
+
+        if (notAvailableLocally.isNotEmpty()) {
+            showMessageInSnackbar(
+                message = getString(R.string.download_to_device_not_available_locally, notAvailableLocally.joinToString(", "))
+            )
+        }
+        if (succeeded.isNotEmpty()) {
+            showMessageInSnackbar(
+                message = getString(R.string.download_to_device_succeeded, succeeded.joinToString(", "))
+            )
+        }
+        if (failed.isNotEmpty()) {
+            showMessageInSnackbar(
+                message = getString(R.string.download_to_device_failed, failed.joinToString(", "))
+            )
         }
     }
 

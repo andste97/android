@@ -151,6 +151,10 @@ class FilterFileMenuOptionsUseCase(
         if (!isAnyFileSynchronizing && !onlyAvailableOfflineFiles && !onlySharedByLinkFiles && hasRemovePermission) {
             optionsToShow.add(FileMenuOption.REMOVE)
         }
+        // Download to device (save a copy to the device's public Downloads folder)
+        if (!anyFolder(files)) {
+            optionsToShow.add(FileMenuOption.DOWNLOAD_TO_DEVICE)
+        }
 
         return optionsToShow
     }
