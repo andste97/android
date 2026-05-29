@@ -195,6 +195,11 @@
     <string name="filedetails_path">Path:</string>
     <string name="filedetails_modified">Modified:</string>
     <string name="filedetails_download">Download</string>
+    <string name="download_to_device">Download to device</string>
+    <string name="download_to_device_succeeded">%1$s saved to Downloads folder</string>
+    <string name="download_to_device_failed">Failed to download %1$s to Downloads folder</string>
+    <string name="download_to_device_not_available_locally">%1$s is not available locally. Please synchronize the file first.</string>
+    <string name="download_to_device_and_more">%1$s and %2$d more</string>
     <string name="filedetails_file_image_content_description">File Image</string>
     <string name="filedetails_cancel_btn_content_description">Cancel download button</string>
     <string name="filedetails_sync_file">Synchronize</string>
